@@ -1,19 +1,28 @@
-from pip import main
-
 import pandas as pd
 import sqlite3
+import os
+
 
 class SystemRs:
     database_rs = None
     diagnosis_code = ""
     tindakan_code = ""
-    prediksi = ""
+    hasilPrediksi = ""
     jumlah = 0
 
-    def loadExcelToDb(self):
-        conn = sqlite3.connect("rsdb.db")
+    def __init__(self):
+        file_exists = os.path.exists("data/rsdb.db")
+        print(file_exists)
+        if not file_exists:
+            self.loadExcelToDb()
+            self.loadDatabse()
+        else:
+            self.loadDatabse()
 
-        df = pd.read_excel("data.xlsx")
+    def loadExcelToDb(self):
+        conn = sqlite3.connect("data/rsdb.db")
+
+        df = pd.read_excel("data/data.xlsx")
         df.to_sql("data_rs", conn, if_exists="replace")
         conn.execute(
             """
@@ -24,10 +33,10 @@ class SystemRs:
         conn.close()
 
     def loadDatabse(self):
-        conn = sqlite3.connect("rsdb.db")
+        conn = sqlite3.connect("data/rsdb.db")
         df = pd.read_sql_query("SELECT * from rs_table", conn)
         conn.close()
-        
+
         rs = df[
             [
                 "NOKARTU",
@@ -53,11 +62,7 @@ class SystemRs:
         rs["Tindakan"] = rs["Tindakan"].astype(str)
         self.database_rs = rs
 
-    def inputDiagnosisCode(self):
-        d1 = input("diagnosis primer")
-        d2 = input("diagnosis sekunder 1")
-        d3 = input("diagnosis sekunder 2")
-        d4 = input("diagnosis sekunder 3")
+    def inputDiagnosisCode(self, d1, d2, d3, d4):
         input_diagnosis_list = [d1, d2, d3, d4]
 
         diagnosis_list = []
@@ -71,11 +76,7 @@ class SystemRs:
 
         self.diagnosis_code = diagnosis_code
 
-    def inputTindakanCode(self):
-        t1 = input("tindakan primer")
-        t2 = input("tindakan sekunder 1")
-        t3 = input("tindakan sekunder 2")
-        t4 = input("tindakan sekunder 3")
+    def inputTindakanCode(self, t1, t2, t3, t4):
         input_tindakan_list = [t1, t2, t3, t4]
 
         tindakan_list = []
@@ -108,14 +109,7 @@ class SystemRs:
                 prediksi = "rugi"
                 jumlah = tarif_rs - tarif_inacbg
 
-            self.prediksi = prediksi
-            self.jumlah = jumlah
-            print(self.prediksi)
+            self.hasilPrediksi = prediksi
+            self.jumlah = str(jumlah)
+            print(self.hasilPrediksi)
             print(self.jumlah)
-
-
-rs = SystemRs()
-rs.loadDatabse()
-rs.inputDiagnosisCode()
-rs.inputTindakanCode()
-rs.prediksi()
