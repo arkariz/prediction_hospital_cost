@@ -3,6 +3,7 @@ import sqlite3
 import os
 
 
+
 class SystemRs:
     database_rs = None
     diagnosis_code = ""
